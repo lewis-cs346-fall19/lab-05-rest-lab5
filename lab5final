@@ -1,0 +1,108 @@
+#! /usr/bin/python3
+
+# Import modules for CGI handling
+import cgi, cgitb
+import os
+import json
+import MySQLdb
+import passwords
+cgitb.enable()
+
+form = cgi.FieldStorage()
+
+conn = MySQLdb.connect(host = passwords.SQL_HOST,
+user = passwords.SQL_USER,
+passwd = passwords.SQL_PASSWD,
+db = "my_database")
+
+def main_page():
+    print("Content-type: text/html")
+    print("Status: 200 OK")
+    print()
+    print("<head>")
+    print("<title>REST WEBSITE</title>")
+    print("</head>")
+    print("<body>")
+    print("<center>")
+    print("<br>")
+    print("<h1>Welcome to Twerk Prince Rental Car Company<br><br></h1> <h2>Hello~  %s %s</h2>" % ("Ian,", " Chaoneng"))
+    print("<h3>我与春风皆过客</h3>")
+    print("<h3>你携秋水揽星河</h3>")
+    print("<a href = '/cgi-bin/lab5scriptcopy/listCars'> List all cars in database </a>")
+    print("<br>")
+    print("<a href = '/cgi-bin/lab5scriptcopy/addCar'> Add a new car</a>")
+    print("</center>")
+    print("</body>")
+
+def listCars():
+    print("Content-type: application/json")
+    print("Status: 200 OK")
+    print()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM cars;")
+    results = cursor.fetchall()
+    cursor.close()
+    records =[]
+    for line in results:
+        record = {"id":line[0], "brand":line[1], "model":line[2], "seats":line[3]}
+        records.append(record)
+    records_json = json.dumps(records, indent=2)
+    print(records_json)
+
+def addCar():
+    print("Content-type: text/html")
+    print("Status: 200 OK")
+    print()
+    print("<center><form action = '/cgi-bin/lab5scriptcopy/addCar' method = 'post'>")
+    print("Brand:<br>")
+    print("<input type = 'text' name = 'Brand'><br>")
+    print("Model:<br>")
+    print("<input type = 'text' name = 'Model'><br>")
+    print("Seats:<br>")
+    print("<input type = 'text' name = 'Seats'><br>")
+    print("<input type = 'submit' value = 'Submit'>")
+    
+    brand = form.getvalue("Brand")
+    model = form.getvalue("Model")
+    seats = form.getvalue("Seats")
+    if brand and model and seats:
+        cursor1 = conn.cursor()
+        cursor1.execute("INSERT INTO cars (brand, model, seats) VALUES ('%s', '%s', %s);" % (brand,model,seats))
+        conn.commit()
+        single_car(cursor1.lastrowid)
+        cursor1.close()
+            
+def single_car(number):
+    print("Content-type: application/json")
+    print("Status: 200 OK")
+    print()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM cars;")
+    results = cursor.fetchall()
+    cursor.close()
+    for line in results:
+        if str(line[0]) == str(number):
+            single = [{"id":line[0], "brand":line[1], "model":line[2], "seats":line[3], "url":"http://ec2-3-222-78-23.compute-1.amazonaws.com/cgi-bin/lab5script/listCars/" + str(line[0])}]
+            single_json = json.dumps(single, indent=2)
+            print(single_json)
+            break
+
+def redirectListCars():
+    print("Status: 302 Redirect")
+    print("Location: car")
+    print()
+
+
+if 'PATH_INFO' in os.environ:
+    path = os.environ["PATH_INFO"]
+else:
+    path = "/"
+
+if path == "/":
+    main_page()
+elif path == "/listCars" or path == "/listCars/":
+    listCars()
+elif path == "/addCar" or path == "/addCar/":
+    addCar()
+elif path.split("/")[2] != "":
+    single_car(path.split("/")[2])
