@@ -28,9 +28,9 @@ def main_page():
     print("<h1>Welcome to Twerk Prince Rental Car Company<br><br></h1> <h2>Hello~  %s %s</h2>" % ("Ian,", " Chaoneng"))
     print("<h3>我与春风皆过客</h3>")
     print("<h3>你携秋水揽星河</h3>")
-    print("<a href = '/cgi-bin/lab5scriptcopy/listCars'> List all cars in database </a>")
+    print("<a href = '/cgi-bin/lab5final/listCars'> List all cars in database </a>")
     print("<br>")
-    print("<a href = '/cgi-bin/lab5scriptcopy/addCar'> Add a new car</a>")
+    print("<a href = '/cgi-bin/lab5final/addCar'> Add a new car</a>")
     print("</center>")
     print("</body>")
 
@@ -53,7 +53,7 @@ def addCar():
     print("Content-type: text/html")
     print("Status: 200 OK")
     print()
-    print("<center><form action = '/cgi-bin/lab5scriptcopy/addCar' method = 'post'>")
+    print("<center><form action = '/cgi-bin/lab5final/addCar' method = 'post'>")
     print("Brand:<br>")
     print("<input type = 'text' name = 'Brand'><br>")
     print("Model:<br>")
@@ -82,7 +82,7 @@ def single_car(number):
     cursor.close()
     for line in results:
         if str(line[0]) == str(number):
-            single = [{"id":line[0], "brand":line[1], "model":line[2], "seats":line[3], "url":"http://ec2-3-222-78-23.compute-1.amazonaws.com/cgi-bin/lab5script/listCars/" + str(line[0])}]
+            single = [{"id":line[0], "brand":line[1], "model":line[2], "seats":line[3], "url":"http://ec2-3-222-78-23.compute-1.amazonaws.com/cgi-bin/lab5fianl/listCars/" + str(line[0])}]
             single_json = json.dumps(single, indent=2)
             print(single_json)
             break
